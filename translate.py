@@ -56,15 +56,15 @@ tf.app.flags.DEFINE_integer("size", 512, "Size of each model layer.")
 tf.app.flags.DEFINE_integer("num_layers", 1, "Number of layers in the model.")
 tf.app.flags.DEFINE_integer("from_vocab_size", 30000, "English vocabulary size.")
 tf.app.flags.DEFINE_integer("to_vocab_size", 30000, "French vocabulary size.")
-tf.app.flags.DEFINE_string("data_dir", r"D:\projects2017\seq2seq-1\data\squad", "Data directory")
-tf.app.flags.DEFINE_string("train_dir", r"D:\projects2017\seq2seq-1\data\squad", "Training directory.")
-tf.app.flags.DEFINE_string("from_train_data", r"D:\projects2017\seq2seq-1\data\squad\train.txt.source",
+tf.app.flags.DEFINE_string("data_dir", r"E:\users\shaohanh\projects\seq2seq_tf\data\squad", "Data directory")
+tf.app.flags.DEFINE_string("train_dir", r"E:\users\shaohanh\projects\seq2seq_tf\data\squad", "Training directory.")
+tf.app.flags.DEFINE_string("from_train_data", r"train.txt.source",
                            "Training data.")
-tf.app.flags.DEFINE_string("to_train_data", r"D:\projects2017\seq2seq-1\data\squad\train.txt.target",
+tf.app.flags.DEFINE_string("to_train_data", r"train.txt.target",
                            "Training data.")
-tf.app.flags.DEFINE_string("from_dev_data", r"D:\projects2017\seq2seq-1\data\squad\dev.txt.source",
+tf.app.flags.DEFINE_string("from_dev_data", r"dev.txt.source",
                            "Training data.")
-tf.app.flags.DEFINE_string("to_dev_data", r"D:\projects2017\seq2seq-1\data\squad\dev.txt.target",
+tf.app.flags.DEFINE_string("to_dev_data", r"dev.txt.target",
                            "Training data.")
 # tf.app.flags.DEFINE_string("from_train_data", None, "Training data.")
 # tf.app.flags.DEFINE_string("to_train_data", None, "Training data.")
@@ -155,31 +155,23 @@ def create_model(session, forward_only):
 
 def train():
     """Train a en->fr translation model using WMT data."""
-    from_train = None
-    to_train = None
-    from_dev = None
-    to_dev = None
-    if FLAGS.from_train_data and FLAGS.to_train_data:
-        from_train_data = FLAGS.from_train_data
-        to_train_data = FLAGS.to_train_data
-        from_dev_data = from_train_data
-        to_dev_data = to_train_data
-        if FLAGS.from_dev_data and FLAGS.to_dev_data:
-            from_dev_data = FLAGS.from_dev_data
-            to_dev_data = FLAGS.to_dev_data
-        from_train, to_train, from_dev, to_dev, _, _ = data_utils.prepare_data(
-            FLAGS.data_dir,
-            from_train_data,
-            to_train_data,
-            from_dev_data,
-            to_dev_data,
-            FLAGS.from_vocab_size,
-            FLAGS.to_vocab_size)
-    else:
-        # Prepare WMT data.
-        print("Preparing WMT data in %s" % FLAGS.data_dir)
-        from_train, to_train, from_dev, to_dev, _, _ = data_utils.prepare_wmt_data(
-            FLAGS.data_dir, FLAGS.from_vocab_size, FLAGS.to_vocab_size)
+    assert FLAGS.from_train_data and FLAGS.to_train_data
+
+    from_train_data = os.path.join(FLAGS.train_dir, FLAGS.from_train_data)
+    to_train_data = os.path.join(FLAGS.train_dir, FLAGS.to_train_data)
+    from_dev_data = from_train_data
+    to_dev_data = to_train_data
+    if FLAGS.from_dev_data and FLAGS.to_dev_data:
+        from_dev_data = os.path.join(FLAGS.train_dir, FLAGS.from_dev_data)
+        to_dev_data = os.path.join(FLAGS.train_dir, FLAGS.to_dev_data)
+    from_train, to_train, from_dev, to_dev, _, _ = data_utils.prepare_data(
+        FLAGS.data_dir,
+        from_train_data,
+        to_train_data,
+        from_dev_data,
+        to_dev_data,
+        FLAGS.from_vocab_size,
+        FLAGS.to_vocab_size)
 
     with tf.Session() as sess:
         # Create model.
